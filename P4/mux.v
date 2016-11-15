@@ -29,23 +29,24 @@ module ALUSrcMux(
 endmodule
 
 module MemtoRegMux(
-	MemtoReg,Source1,Source2,Source3,SelectSource
+	MemtoReg,Source1,Source2,Source3,Source4,SelectSource
 	);
 	input [1:0] MemtoReg;
 	input [31:0] Source1;//ALU result
 	input [31:0] Source2;//Mem
 	input [31:0] Source3;//lui
+	input [31:0] Source4;//PC+4
 	output [31:0] SelectSource;
 
 	parameter ALUResult = 2'b00,MemResult = 2'b01,
-				ExtResult = 2'b10;
+				ExtResult = 2'b10;PCSave = 2'b11;
 	assign SelectSource = (MemtoReg==ALUResult)?Source1:(
-					(MemtoReg==MemResult)?Source2:Source3);
+			(MemtoReg==MemResult)?Source2:((MemtoReg==ExtResult)?Source3:Source4));
 
 endmodule
 
 module NPCMux(
-	Branch,Jump,Source1,Source2,Source3,Source4,SelectSource
+	Branch,zero,Jump,Source1,Source2,Source3,Source4,SelectSource
 	);
 	input Branch;
 	input [1:0] Jump;
@@ -56,7 +57,7 @@ module NPCMux(
 	output [31:2] SelectSource;
 
 	wire [31:2] temp;
-	assign temp = (Branch)?Source2:Source1;
+	assign temp = (Branch & zero)?Source2:Source1;
 	assign SelectSource = (Jump==2'b00)?temp:((Jump==2'b01)?Source3:Source4);
 	
 endmodule
