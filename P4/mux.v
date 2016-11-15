@@ -39,7 +39,7 @@ module MemtoRegMux(
 	output [31:0] SelectSource;
 
 	parameter ALUResult = 2'b00,MemResult = 2'b01,
-				ExtResult = 2'b10;PCSave = 2'b11;
+				ExtResult = 2'b10,PCSave = 2'b11;
 	assign SelectSource = (MemtoReg==ALUResult)?Source1:(
 			(MemtoReg==MemResult)?Source2:((MemtoReg==ExtResult)?Source3:Source4));
 

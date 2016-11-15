@@ -9,16 +9,15 @@ module pc(
 	output reg [31:0] PC_current;
 
 	initial begin
-		PC_current <= `PC_INIT;
+		PC_current <= PC_INIT;
 	end
 
 	always@(posedge clk or posedge reset)begin
 		if(reset)begin
-			PC_current <= `PC_INIT;
+			PC_current <= PC_INIT;
 		end
 		else begin
 			PC_current <= PC_next; 
-			endcase
 		end
 	end
 

@@ -10,11 +10,11 @@
 //define
 `define Operation 31:26
 `define function 5:0
-`define Rs 25:21
-`define Rt 20:16
-`define Rd 15:11
-`define Imm16 15:0
-`define Imm26 25:0
+`define RS 25:21
+`define RT 20:16
+`define RD 15:11
+`define IMM16 15:0
+`define IMM26 25:0
 //support mips instructions0:
 // nop,jal,jr,addu,subu,ori,lw,sw,beq,lui
 //care [31:2] [11:2]
@@ -94,15 +94,15 @@ module mips(
 	//assign
 	assign Opcode = Instr[`Operation];
 	assign Func = Instr[`function];
-	assign Rs = Instr[`Rs];
-	assign Rt = Instr[`Rt];
-	assign Rd = Instr[`Rd];
-	assign Imm16 = Instr[`Imm16];
-	assign Imm26 = Instr[`Imm26];  
+	assign Rs = Instr[`RS];
+	assign Rt = Instr[`RT];
+	assign Rd = Instr[`RD];
+	assign Imm16 = Instr[`IMM16];
+	assign Imm26 = Instr[`IMM26];  
 	//instance and //execute first instruction except write operation
 	pc myPC(.reset(reset),.PC_current(PC));
 	/////////////////////////////////////////////////
-	im_4k myIM(.addr(PC[11:2],.dout(Instr)));
+	im_4k myIM(.addr(PC[11:2]),.dout(Instr));
 	/////////////////////////////////////////////////
 	ctrl MyController(.Op(Opcode),.Func(Func),.Jump(Jump),.Branch(Branch),
 		.ALUSrc(ALUSrc),.ALUOp(ALUOp),.ExtOp(ExtOp),.MemWrite(MemWrite),
@@ -121,7 +121,7 @@ module mips(
 		.SelectSource(B));
 	assign A = RData1;
 	//////////////////////////////////////////////
-	alu myALU(.A(A),.B(B),.ALUOp(ALUOp),.outcome(outcome).zero(zero));
+	alu myALU(.A(A),.B(B),.ALUOp(ALUOp),.outcome(outcome),.zero(zero));
 	//////////////////////////////////////////////
 	dm_4k myDM(.reset(reset),.addr(outcome[11:2]),.dout(MData));
 	//////////////////////////////////////////////
@@ -131,11 +131,10 @@ module mips(
 	WriteRegMux myWriteReg(.WriteRegDist(WriteRegDist),.Source1(Rt),.Source2(Rd),
 		.Source3(ra),.SelectSource(RegWrite));
 	//////////////////////////////////////////////
-	NPCMux myNPC();
 
 	always@(posedge clk or posedge reset)begin
 		if(reset)begin
-			myPC(.clk(clk),.reset(reset),.PC_current(PC));
+			NPCMux myPC(.clk(clk),.reset(reset),.PC_current(PC));
 			myDM(.clk(clk),.reset(reset));
 			myGRF(.clk(clk),.reset(reset));
 		end
@@ -147,7 +146,7 @@ module mips(
 			myDM(.clk(clk),.reset(reset),.we(MemWrite),.din(SData));
 
 			//next procedure
-		    myIM(.addr(PC[11:2],.dout(Instr)));
+		    myIM(.addr(PC[11:2]),.dout(Instr));
 			MyController(.Op(Opcode),.Func(Func),.Jump(Jump),.Branch(Branch),
 				.ALUSrc(ALUSrc),.ALUOp(ALUOp),.ExtOp(ExtOp),.MemWrite(MemWrite),
 				.MemtoReg(MemtoReg),.WriteEn(WriteEn),.WriteRegDist(WriteRegDist));
@@ -157,7 +156,7 @@ module mips(
 				.ExtL_Imm32(ExtL_Imm32),.ExtJ_Imm28(ExtJ_Imm28));
 			myALUSrc(.ALUSrc(ALUSrc),.Source1(RData2),.Source2(ExtH_Imm32),
 				.SelectSource(B));
-			myALU(.A(A),.B(B),.ALUOp(ALUOp),.outcome(outcome).zero(zero));
+			myALU(.A(A),.B(B),.ALUOp(ALUOp),.outcome(outcome),.zero(zero));
 			myDM(.reset(reset),.addr(outcome[11:2]),.dout(MData));
 			myMemtoReg(.MemtoReg(MemtoReg),.Source1(outcome),.Source2(MData),
 				.Source3(ExtL_Imm32),.Source4(PC4),.SelectSource(WData));
